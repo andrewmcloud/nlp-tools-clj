@@ -1,6 +1,7 @@
 (ns nlp-tools-clj.core
   (:require [clojure.core.matrix :as m]
-            [nlp-tools-clj.term-frequencies :as tf]))
+            [nlp-tools-clj.term-frequencies :as tf]
+            [nlp-tools-clj.tfidf :as tfidf]))
 
 (m/set-current-implementation :vectorz)
 
@@ -19,3 +20,12 @@
                    term-frequency-maps))
     {:terms terms
      :term-frequency-matrix M}))
+
+(defn tf-idf
+  [term-frequency-matrix]
+  (let [M (m/new-sparse-array (m/shape term-frequency-matrix))]
+    (dorun
+      (map-indexed (fn [idx row]
+                     (m/set-row! M idx row))
+                   (tfidf/tfidf-corpus term-frequency-matrix)))
+    M))

@@ -12,9 +12,9 @@
   args: text - string
   returns: string"
   [text]
-  (as-> text t
-        (s/lower-case t)
-        (s/replace t #"[!@#$%^&*=+(),.>?/]" " ")))
+  (-> text
+      (s/lower-case)
+      (s/replace #"[!@#$%^&*=+(),.>?/]" " ")))
 
 (defn tokenize
   "tokenize text with opennlp english tokenizer
@@ -31,11 +31,11 @@
   args: text - string
   returns: lazy-seq"
   [text]
-  (->> text
-       clean-text
-       tokenize
-       (remove stopwords)
-       (map keyword)))
+  (let [clean-xf (comp (remove stopwords) (map keyword))]
+    (->> text
+         clean-text
+         tokenize
+         (sequence clean-xf))))
 
 (defn get-frequencies
   "builds a document term-frequency vector based on corpus vocabulary
@@ -56,6 +56,4 @@
   args: term-frequency-maps - coll of maps document-terms and frequencies [{term1 freq, ... , term2 freq} {...} ... ]
   returns: lazy-seq"
   [term-frequency-maps]
-  (->> term-frequency-maps
-       (mapcat keys)
-       distinct))
+  (sequence (comp (mapcat keys) (distinct)) term-frequency-maps))
